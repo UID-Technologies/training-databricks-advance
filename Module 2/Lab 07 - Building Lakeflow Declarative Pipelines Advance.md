@@ -1,9 +1,9 @@
 
-# ⭐ **Lab 07 — Building Lakeflow Declarative Pipelines (Advanced)**
+#  **Lab 07 — Building Lakeflow Declarative Pipelines (Advanced)**
 
 ---
 
-# 🧪 **Lab 3.1 – Streaming Joins Overview**
+#  **Lab 3.1 – Streaming Joins Overview**
 
 ### Step 1 — Create streaming customers and orders
 
@@ -37,7 +37,7 @@ datasets:
 
 ---
 
-# 🧪 **Lab 3.2 – Deploy Pipeline to Production**
+#  **Lab 3.2 – Deploy Pipeline to Production**
 
 ### Step 1 — Promote pipeline from dev → prod
 
@@ -60,7 +60,7 @@ Steps:
 
 ---
 
-# 🧪 **Lab 3.3 – Change Data Capture (CDC) Overview**
+#  **Lab 3.3 – Change Data Capture (CDC) Overview**
 
 Explain that:
 
@@ -69,7 +69,7 @@ Explain that:
 
 ---
 
-# 🧪 **Lab 3.4 – Hands-On: CDC Using CHANGE INTO**
+#  **Lab 3.4 – Hands-On: CDC Using CHANGE INTO**
 
 ### Step 1 — Create CDC source dataset
 
@@ -117,7 +117,7 @@ SELECT * FROM training.silver.orders_cdc;
 
 ---
 
-# 🧪 **Lab 3.5 – Additional Features Overview**
+#  **Lab 3.5 – Additional Features Overview**
 
 Trainer quickly demonstrates:
 
@@ -128,15 +128,3 @@ Trainer quickly demonstrates:
 * Using `materialized_view` for gold aggregates
 
 ---
-
-# 🎉 If you'd like next:
-
-I can produce:
-
-✅ A full **PDF-ready Lab Manual**
-✅ A full **32-hour structured course**
-✅ A **project template** for students
-✅ **Slide deck** with diagrams
-✅ A **Git repo folder structure** for declarative pipelines
-
-Just tell me **“Create Lab Manual PDF packet”** or **“Create slides for this module”**.

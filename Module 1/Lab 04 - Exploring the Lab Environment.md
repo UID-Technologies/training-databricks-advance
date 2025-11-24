@@ -1,15 +1,15 @@
-## 🧪 Lab 4 – Exploring the Lab Environment (Workspace + UC + DBFS)
+##  Lab 4 – Exploring the Lab Environment (Workspace + UC + DBFS)
 
 **Covers:** “Exploring the Lab Environment”
 **Estimated Time:** 45–60 minutes
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 * Explore **Workspace**, **Catalog**, **DBFS**, **Compute**, and **Workflows**.
 * Understand Unity Catalog’s **Catalog → Schema → Table** model.
 * Learn how to inspect files and tables interactively.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Workspace access with Unity Catalog enabled (ideal, but not mandatory).
 * At least one table already created (from previous labs).
@@ -121,15 +121,3 @@ Discuss:
   * Workflows = orchestration.
 
 ---
-
-## 👉 What next?
-
-If you want, I can:
-
-* **Bundle these 4 labs into a PDF-style trainer guide** (with intro, objectives, screenshots placeholders), or
-* **Extend same step-by-step style for the remaining modules of the 32-hour program** (Auto Loader, DLT, Workflows, Optimization, Capstone, etc.).
-
-Tell me:
-
-* “Make PDF-style lab manual” **or**
-* “Continue labs for remaining modules (Day 2/3/4)”

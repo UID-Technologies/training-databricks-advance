@@ -1,6 +1,6 @@
-## 🧪 Lab 4 – Advanced Lakeflow Jobs Features & Best Practices
+##  Lab 4 – Advanced Lakeflow Jobs Features & Best Practices
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 Learners will:
 
@@ -9,7 +9,7 @@ Learners will:
 * Configure **retries & failure behavior**.
 * Discuss **production best practices**.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Job `lf_job_etl_pipeline` with multiple tasks.
 * Some comfort with editing tasks.

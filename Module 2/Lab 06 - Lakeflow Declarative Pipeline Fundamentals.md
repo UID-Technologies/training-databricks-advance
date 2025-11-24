@@ -1,11 +1,11 @@
 
-# ⭐ **Lab 06 — Lakeflow Declarative Pipeline Fundamentals**
+#  **Lab 06 — Lakeflow Declarative Pipeline Fundamentals**
 
 ---
 
-# 🧪 **Lab 2.1 – Dataset Types Overview**
+#  **Lab 2.1 – Dataset Types Overview**
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 Understand all dataset types:
 
@@ -55,7 +55,7 @@ SELECT * FROM live.country_mv;
 
 ---
 
-# 🧪 **Lab 2.2 – Simplified Pipeline Development**
+#  **Lab 2.2 – Simplified Pipeline Development**
 
 ### Step 1 — Create a Simple Silver Pipeline
 
@@ -86,7 +86,7 @@ SELECT * FROM live.orders_silver;
 
 ---
 
-# 🧪 **Lab 2.3 – Common Pipeline Settings**
+#  **Lab 2.3 – Common Pipeline Settings**
 
 Add settings such as:
 

@@ -1,7 +1,7 @@
 
-## 🧪 Lab 3 – Creating & Scheduling Jobs
+##  Lab 3 – Creating & Scheduling Jobs
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 Learners will:
 
@@ -9,7 +9,7 @@ Learners will:
 * Set **schedules and triggers**.
 * Explore **run parameters** and **job-level settings**.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Lab 2 job `lf_job_etl_pipeline` created.
 * Permission to define **schedules**.

@@ -1,16 +1,16 @@
-## 🧪 Lab 3 – Delta Lake Essentials & Time Travel
+##  Lab 3 – Delta Lake Essentials & Time Travel
 
 **Covers:** “Delta Lake Review”
 **Estimated Time:** 60–90 minutes
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 * Create **Delta tables** using PySpark and SQL.
 * Understand **ACID** behavior through updates.
 * Use **Time Travel** and **DESCRIBE HISTORY**.
 * Try **MERGE INTO**.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Catalog & schema available: e.g. `training.bronze`, `training.silver`.
 * A cluster running.

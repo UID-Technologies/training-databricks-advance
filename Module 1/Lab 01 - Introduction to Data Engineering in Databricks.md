@@ -1,9 +1,9 @@
-## 🧪 Lab 1 – Introduction to Data Engineering in Databricks
+##  Lab 1 – Introduction to Data Engineering in Databricks
 
 **Covers:** “Data Engineering in Databricks” (concept + hands-on)
 **Estimated Time:** 45–60 minutes
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 By the end of this lab, learners will:
 
@@ -11,7 +11,7 @@ By the end of this lab, learners will:
 * Run basic **PySpark** and **SQL** code.
 * See how data engineering = **ingestion → transform → write** in Databricks.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Databricks workspace access.
 * Permission to create a **cluster** and **notebooks**.

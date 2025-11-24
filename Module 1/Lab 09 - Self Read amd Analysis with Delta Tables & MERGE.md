@@ -1,6 +1,6 @@
-## 🧪 Lab 09 – Self Read / Analysis with Delta Tables & MERGE
+## Lab 09 – Self Read / Analysis with Delta Tables & MERGE
 
-### 🔷 What is “Self Read / Analysis”?
+###  What is “Self Read / Analysis”?
 
 In a real enterprise pipeline, you don’t just blindly MERGE new data into an existing table.
 
@@ -15,7 +15,7 @@ This lab makes participants practice that pattern.
 
 ---
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 By the end of this lab, learners will be able to:
 
@@ -27,7 +27,7 @@ By the end of this lab, learners will be able to:
 
 ---
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Running Databricks cluster.
 * Unity Catalog or Hive metastore with permissions.

@@ -1,14 +1,14 @@
 
-## 🔹 Section 05 – Cloud Storage Ingestion with LakeFlow Connect Standard Connectors
+## Lab 05 – Cloud Storage Ingestion with LakeFlow Connect Standard Connectors
 
 ---
 
-### 🧪 Lab 2.1 – Introduction to Data Ingestion from Cloud Storage
+###  Lab 5.1 – Introduction to Data Ingestion from Cloud Storage
 
 **Subtopic:** *Introduction to Data Ingestion from Cloud Storage*
 **Duration:** 45–60 minutes
 
-#### 🎯 Learning Objectives
+####  Learning Objectives
 
 By the end of this lab, learners will:
 
@@ -16,7 +16,7 @@ By the end of this lab, learners will:
 * Ingest CSV files from **cloud storage** (S3 / ADLS / GCS / DBFS) into a **Delta table**.
 * Understand basic **schema detection** and **bronze layer** storage.
 
-#### ✅ Prerequisites
+####  Prerequisites
 
 * Databricks workspace + LakeFlow Connect enabled.
 * Access to a cloud storage location or DBFS.
@@ -150,12 +150,12 @@ LIMIT 20;
 
 ---
 
-### 🧪 Lab 2.2 – Appending Metadata Columns on Ingest
+###  Lab 5.2 – Appending Metadata Columns on Ingest
 
 **Subtopic:** *Appending Metadata Columns on Ingest*
 **Duration:** 30–45 minutes
 
-#### 🎯 Learning Objectives
+####  Learning Objectives
 
 * Configure LakeFlow Connect to automatically add **metadata columns**:
 
@@ -164,9 +164,9 @@ LIMIT 20;
   * Batch ID, etc.
 * Understand why metadata is important for **auditing** and **troubleshooting**.
 
-#### ✅ Prerequisites
+####  Prerequisites
 
-* Lab 2.1 completed.
+* Lab 5.1 completed.
 * Another CSV file or the same folder with multiple files, such as `orders_2024_01.csv`, `orders_2024_02.csv`.
 
 ---
@@ -270,18 +270,18 @@ Questions to ask:
 
 ---
 
-### 🧪 Lab 2.3 – Working with the Rescued Data Column
+###  Lab 5.3 – Working with the Rescued Data Column
 
 **Subtopic:** *Working with the Rescued Data Column*
 **Duration:** 45–60 minutes
 
-#### 🎯 Learning Objectives
+####  Learning Objectives
 
 * Understand what the **rescued data column** is.
 * See how LakeFlow stores unparseable / extra columns in this JSON-like field.
 * Learn how to analyze and fix bad data.
 
-#### ✅ Prerequisites
+####  Prerequisites
 
 * Basic ingestion pipeline working (Lab 2.1).
 * Ability to edit / create “slightly bad” CSV files.
@@ -400,18 +400,18 @@ df.select("order_id", "amount", "_rescued_data").show(truncate=False)
 
 ---
 
-### 🧪 Lab 2.4 – Ingesting Semi-Structured Data: JSON
+###  Lab 5.4 – Ingesting Semi-Structured Data: JSON
 
 **Subtopic:** *Ingesting Semi-Structured Data: JSON*
 **Duration:** 45–60 minutes
 
-#### 🎯 Learning Objectives
+####  Learning Objectives
 
 * Ingest **JSON** files from cloud storage using LakeFlow standard connectors.
 * Understand how nested JSON becomes **struct** / **array** columns in Delta.
 * Practice flattening nested JSON into relational columns.
 
-#### ✅ Prerequisites
+####  Prerequisites
 
 * LakeFlow Connect accessible.
 * Sample JSON file, e.g. `customers.json`:

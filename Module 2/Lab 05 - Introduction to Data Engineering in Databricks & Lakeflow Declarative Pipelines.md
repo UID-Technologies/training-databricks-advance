@@ -1,11 +1,11 @@
 
-# ⭐ **Lab 05 — Introduction to Data Engineering in Databricks & Lakeflow Declarative Pipelines**
+#  **Lab 05 — Introduction to Data Engineering in Databricks & Lakeflow Declarative Pipelines**
 
 ---
 
-# 🧪 **Lab 1.1 – What Are Lakeflow Declarative Pipelines? (Hands-On Introduction)**
+#  **Lab 1.1 – What Are Lakeflow Declarative Pipelines? (Hands-On Introduction)**
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 By the end of this lab, learners will understand:
 
@@ -129,9 +129,9 @@ SELECT * FROM live.hello_world;
 
 ---
 
-# 🧪 **Lab 1.2 – Course Setup & Creating a Pipeline**
+#  **Lab 1.2 – Course Setup & Creating a Pipeline**
 
-### 🎯 Learning Objectives:
+###  Learning Objectives:
 
 * Set up folder structure for the entire course.
 * Create your first real Lakeflow Declarative Pipeline.
@@ -228,7 +228,7 @@ SELECT * FROM live.orders_bronze;
 
 The complete course project:
 
-#### 🌟 Build a full declarative Lakeflow pipeline including:
+####  Build a full declarative Lakeflow pipeline including:
 
 1. **Bronze ingestion**
 

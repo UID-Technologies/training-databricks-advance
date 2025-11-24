@@ -1,7 +1,7 @@
 
-## 🧪 Lab 1 – Getting Started with Lakeflow Jobs (What is Lakeflow Jobs?)
+## Lab 1 – Getting Started with Lakeflow Jobs (What is Lakeflow Jobs?)
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 By the end of this lab, learners will:
 
@@ -9,7 +9,7 @@ By the end of this lab, learners will:
 * Create a very simple **single-task job** that runs a notebook.
 * View job runs and logs.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Databricks workspace with Lakeflow enabled.
 * Permission to create **jobs** and **notebooks**.

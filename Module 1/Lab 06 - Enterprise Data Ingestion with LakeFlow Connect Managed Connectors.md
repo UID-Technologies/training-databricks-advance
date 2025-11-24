@@ -1,5 +1,5 @@
 
-## 🔹 Section 06 – Enterprise Data Ingestion with LakeFlow Connect Managed Connectors
+## Lab 06 – Enterprise Data Ingestion with LakeFlow Connect Managed Connectors
 
 Here we assume you have **enterprise sources** like relational DB, SaaS apps (Salesforce, Dynamics, etc.).
 
@@ -7,7 +7,7 @@ We’ll do **one bigger lab** that shows the pattern; you can adapt the specific
 
 ---
 
-### 🧪 Lab 3.1 – Ingesting Enterprise Data with LakeFlow Managed Connectors
+###  Lab 6.1 – Ingesting Enterprise Data with LakeFlow Managed Connectors
 
 **Subtopics:**
 
@@ -16,13 +16,13 @@ We’ll do **one bigger lab** that shows the pattern; you can adapt the specific
 
 **Duration:** 60–90 minutes
 
-#### 🎯 Learning Objectives
+####  Learning Objectives
 
 * Configure a **managed connector** (e.g., Azure SQL DB / PostgreSQL / Salesforce).
 * Ingest data from **enterprise source tables** to Delta bronze.
 * Understand **full load vs incremental** (CDC / primary key-based).
 
-#### ✅ Prerequisites
+####  Prerequisites
 
 * Credentials / connection info for one enterprise source:
 

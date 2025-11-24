@@ -1,6 +1,6 @@
-## 🧪 Lab 2 – Lakeflow Jobs Core Components & Orchestration
+##  Lab 2 – Lakeflow Jobs Core Components & Orchestration
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 Learners will:
 
@@ -11,7 +11,7 @@ Learners will:
 
   * Bronze load → Silver transform → Validation.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Lab 1 completed (or at least know how to create a job).
 * Ability to create 2–3 simple notebooks.

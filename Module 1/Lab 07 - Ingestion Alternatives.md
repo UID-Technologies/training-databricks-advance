@@ -1,5 +1,5 @@
 
-## 🔹 Section 07 – Ingestion Alternatives
+## Lab 07 – Ingestion Alternatives
 
 We focus on:
 
@@ -8,7 +8,7 @@ We focus on:
 
 ---
 
-### 🧪 Lab 4.1 – Ingesting into Existing Delta Tables
+### Lab 7.1 – Ingesting into Existing Delta Tables
 
 **Subtopics:**
 
@@ -17,13 +17,13 @@ We focus on:
 
 **Duration:** 45–60 minutes
 
-#### 🎯 Learning Objectives
+#### Learning Objectives
 
 * Map incoming data to an **existing Delta table** schema.
 * Handle scenarios where table already exists and you want to **append** or **merge**.
 * Understand schema mapping options.
 
-#### ✅ Prerequisites
+#### Prerequisites
 
 * An existing Delta table, e.g.:
   `training.silver.orders_clean` (created in earlier labs).
@@ -110,7 +110,7 @@ Before and after ingestion.
 
 ---
 
-### 🧪 Lab 4.2 – Data Ingestion with MERGE INTO (Self Read / Analysis Pattern)
+###  Lab 7.2 – Data Ingestion with MERGE INTO (Self Read / Analysis Pattern)
 
 **Subtopic:**
 
@@ -118,7 +118,7 @@ Before and after ingestion.
 
 **Duration:** 60–90 minutes
 
-#### 🎯 Learning Objectives
+####  Learning Objectives
 
 * Implement ingestion using **MERGE INTO** for upsert scenarios (slowly changing data).
 * Use a **staging table** (or temporary table) as source for MERGE.
@@ -128,7 +128,7 @@ Before and after ingestion.
   * Compare with new data
   * MERGE changes.
 
-#### ✅ Prerequisites
+#### Prerequisites
 
 * Delta table `training.silver.orders_clean`.
 * Some understanding of MERGE (from previous labs).

@@ -1,16 +1,16 @@
 
-## 🧪 Lab 2 – Ingest Data with LakeFlow Connect
+##  Lab 2 – Ingest Data with LakeFlow Connect
 
 **Covers:** “What is Lakeflow Connect?”
 **Estimated Time:** 60–75 minutes
 
-### 🎯 Learning Objectives
+###  Learning Objectives
 
 * Use **LakeFlow Connect** to ingest a file from cloud storage.
 * Land data into a **bronze Delta table**.
 * Understand configuration of sources & targets.
 
-### ✅ Prerequisites
+###  Prerequisites
 
 * Same cluster running (or serverless).
 * A small CSV file, e.g. `orders.csv` with columns like:
