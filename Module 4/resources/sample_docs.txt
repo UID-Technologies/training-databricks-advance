@@ -1,0 +1,5 @@
+Databricks provides a unified Lakehouse platform for data, analytics, and AI.
+The Lakehouse combines the reliability of data warehouses with the scale of data lakes.
+RAG enables LLMs to use enterprise data securely and accurately.
+Delta Lake brings ACID transactions and schema enforcement.
+Vector embeddings convert text into numerical form for similarity search.
