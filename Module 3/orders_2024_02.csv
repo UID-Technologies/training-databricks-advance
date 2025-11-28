@@ -1,0 +1,6 @@
+order_id,order_date,customer_id,country,amount
+6,2024-02-01,101,USA,80.0
+7,2024-02-02,106,India,140.1
+8,2024-02-03,107,France,60.0
+9,2024-02-04,108,USA,300.0
+10,2024-02-05,109,India,50.5

@@ -1,0 +1,6 @@
+customer_id,full_name,email,country,signup_date,update_ts
+101,John Doe,john.doe@example.com,USA,2024-01-01,2024-01-01 10:00:00
+102,Ana Smith,ana.smith@example.com,India,2024-01-05,2024-01-05 11:00:00
+103,Michael Lee,michael.lee@example.com,UK,2024-01-10,2024-01-10 12:00:00
+104,Sara Khan,sara.khan@example.com,Germany,2024-01-15,2024-01-15 09:30:00
+105,Luis Garcia,luis.garcia@example.com,Spain,2024-01-20,2024-01-20 16:45:00
