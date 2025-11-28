@@ -1,7 +1,7 @@
 
-#  **LAB 9 — Delta Live Tables Pipeline (SCD1 + SCD2 + CDC)**
+#  **LAB 5 — Delta Live Tables Pipeline (SCD1 + SCD2 + CDC)**
 
-**Duration:** 60–90 minutes
+
 **Level:** Advanced
 
 ---
@@ -281,7 +281,7 @@ Pipeline → Logs → Event Logs
 
 ---
 
-#  **LAB 9 COMPLETED — What You Built**
+#  **LAB COMPLETED — What You Built**
 
 ✔ **Bronze Table** (streaming ingestion from cloud_files)
 ✔ **Silver Table (SCD1)** (cleaned & deduped)

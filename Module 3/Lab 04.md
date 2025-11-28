@@ -1,7 +1,7 @@
 
-#  **LAB 7 — LakeFlow Jobs (DLT + Notebooks + If/Else Branching)**
+#  **LAB 4 — LakeFlow Jobs (DLT + Notebooks + If/Else Branching)**
 
-**Duration:** 60 minutes
+
 **Level:** Intermediate → Advanced
 
 ---
@@ -288,7 +288,7 @@ Add:
 
 ---
 
-#  **LAB 7 COMPLETE — What You Learned**
+#  **LAB  COMPLETE — What You Learned**
 
 You created an enterprise-level pipeline using:
 

@@ -1,7 +1,6 @@
 
-# **LAB 4 — Install Python Libraries in Job Task (Not on Compute) + Environment Isolation Verification**
+# **LAB 01 — Install Python Libraries in Job Task (Not on Compute) + Environment Isolation Verification**
 
-**Duration:** 60–75 minutes**
 **Designed for Databricks Managed Trial / Serverless Compute**
 
 This is the *most complete, enterprise-grade* lab on Job-Scoped Libraries—

@@ -1,6 +1,6 @@
-# **LAB 5 — Enterprise Ingestion Using LakeFlow Connect (SQL Server → Bronze → Silver)**
+# **LAB 2 — Enterprise Ingestion Using LakeFlow Connect (SQL Server → Bronze → Silver)**
 
-**Duration:** 45–60 minutes
+
 **Workspace:** Databricks Managed Trial **supported**
 **Skill Level:** Intermediate → Advanced
 
@@ -16,7 +16,7 @@ This lab shows how enterprise teams use **LakeFlow Connect** for:
 
 ---
 
-# **Business Scenario**
+#  **Business Scenario**
 
 You are part of the **Acado Retail Data Engineering Team**.
 The HR system stores employee master data in an **Azure SQL Database**.

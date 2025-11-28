@@ -1,8 +1,8 @@
 
 
-#  **LAB 11 — Unity Catalog: External Location + Access Policies**
+#  **LAB 07 — Unity Catalog: External Location + Access Policies**
 
-**Duration:** 45 minutes
+
 **Level:** Intermediate → Advanced
 
 ---
@@ -238,7 +238,7 @@ SELECT * FROM ext_raw_vol;
 
 ---
 
-#  **LAB 11 COMPLETED — What You Learned**
+#  **LAB COMPLETED — What You Learned**
 
 You now understand:
 

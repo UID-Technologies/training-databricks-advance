@@ -1,6 +1,6 @@
-#  **LAB 10 — Aggregations with Real-Time Streaming Tables**
+#  **LAB 06 — Aggregations with Real-Time Streaming Tables**
 
-**Duration:** 30 minutes
+
 **Level:** Intermediate → Advanced
 
 ---
@@ -189,7 +189,7 @@ GROUP BY country, order_date;
 
 ---
 
-#  **LAB 10 COMPLETED — What You Learned**
+#  **LAB COMPLETED — What You Learned**
 
 You now understand:
 

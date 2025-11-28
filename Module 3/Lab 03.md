@@ -1,6 +1,6 @@
-#  **LAB 6 — Delta Tables, Streaming Tables & Materialized Views**
+#  **LAB 3 — Delta Tables, Streaming Tables & Materialized Views**
 
-**Duration:** 40 minutes
+
 **Level:** Intermediate
 **Goal:** Learn the three foundational table types of Databricks Unity Catalog and how they behave in real-time ingestion.
 
