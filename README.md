@@ -214,7 +214,7 @@ Govern sensitive data like PII, finance, health data.
 
 #  **Final Summary**
 
-**Data Engineering** → Build and maintain large-scale data pipelines.
+**Data Engineering** →   Build and maintain large-scale data pipelines.
 **Databricks** → A unified platform for data engineering, streaming, analytics, and AI.
 
 ### **Databricks gives you:**
