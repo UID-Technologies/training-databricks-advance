@@ -299,7 +299,7 @@ You should see:
 
 ### ✔ Task A
 
-* pandas == **1.5.3**
+* pandas == **2.2.2**
 * numpy == **1.26.4**
 * env hash: `abc123...`
 
