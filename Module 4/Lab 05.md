@@ -17,8 +17,16 @@ By the end of this lab, learners will:
 Use the MLflow model you created in `LAB 4`.
 
 ```python
+%pip install sentence-transformers
+dbutils.library.restartPython()
+```
+
+
+```python
 import mlflow
 import mlflow.pyfunc
+import numpy as np
+from mlflow.models import infer_signature
 
 class Embedder(mlflow.pyfunc.PythonModel):
     def load_context(self, context):
@@ -32,17 +40,29 @@ class Embedder(mlflow.pyfunc.PythonModel):
 ### ✔ Log the model
 
 ```python
+# 1. Create example input & output for signature
+example_input = ["hello world"]
+example_output = np.random.rand(384).tolist()  # MiniLM-L6 gives 384-dim embeddings
+
+signature = infer_signature(example_input, example_output)
+```
+
+```python
+# 2. Log model with signature
 with mlflow.start_run() as run:
     mlflow.pyfunc.log_model(
         artifact_path="embedder",
-        python_model=Embedder()
+        python_model=Embedder(),
+        signature=signature
     )
+    
     model_uri = f"runs:/{run.info.run_id}/embedder"
 ```
 
 ### ✔ Register to Model Registry
 
 ```python
+# 3. Register model
 registered_model = mlflow.register_model(
     model_uri=model_uri,
     name="rag_embedder_model"
@@ -52,6 +72,9 @@ registered_model = mlflow.register_model(
 ### **Expected Output**
 
 A new entry will appear in:
+```
+Created version '1' of model 'workspace.default.rag_embedder_model'.
+```
 
 **Databricks → Models → rag_embedder_model**
 
@@ -77,11 +100,13 @@ client.transition_model_version_stage(
 Or promote to production:
 
 ```python
-client.transition_model_version_stage(
+from mlflow.tracking import MlflowClient
+client = MlflowClient()
+
+client.set_registered_model_alias(
     name="rag_embedder_model",
-    version=registered_model.version,
-    stage="Production",
-    archive_existing_versions=True
+    alias="prod",
+    version=registered_model.version
 )
 ```
 
@@ -134,15 +159,11 @@ https://<workspace>/serving-endpoints/rag_embedder_endpoint/invocations
 ```python
 import requests
 import json
-import os
 
-token = dbutils.secrets.get("databricks", "token")   # or manually paste PAT
+token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+url = "https://<workspace-url>/serving-endpoints/rag_embedder_endpoint/invocations"
 
-url = "<serving-endpoint-url>"
-
-payload = {
-    "inputs": ["What is Delta Lake?"]
-}
+payload = {"inputs": ["What is Delta Lake?"]}
 
 headers = {
     "Authorization": f"Bearer {token}",
@@ -151,6 +172,7 @@ headers = {
 
 resp = requests.post(url, headers=headers, data=json.dumps(payload))
 resp.json()
+
 ```
 
 ---
@@ -183,11 +205,9 @@ Replace local embedder with served version:
 ```python
 def embed_via_endpoint(texts):
     payload = {"inputs": texts}
-    
     response = requests.post(url, headers=headers, data=json.dumps(payload))
-    emb = response.json()["predictions"]
-    
-    return emb
+    return response.json()["predictions"]
+
 ```
 
 ---
@@ -195,34 +215,59 @@ def embed_via_endpoint(texts):
 ### 2 Use embeddings in RAG retrieval
 
 ```python
-q_emb = embed_via_endpoint(["What is Delta Lake?"])[0]
-q_emb = np.array(q_emb, dtype="float32")
-```
+# Query embedding
+q_emb = np.array(embed_via_endpoint(["What is Delta Lake?"])[0], dtype="float32")
 
----
-
-### 3 Retrieval step (same as before)
-
-```python
+# Compute similarity
 similarities = np.dot(vectors, q_emb)
 top_idx = similarities.argsort()[-3:][::-1]
+
 context = "\n".join(chunks[i] for i in top_idx)
+
+context
 ```
+
+
 
 ---
 
 ### 4 Build prompt and send to LLM
 
 ```python
-prompt = f"""
-Use ONLY this context to answer:
 
+
+prompt = f"""
+Use ONLY the context below to answer the question.
+
+Context:
 {context}
 
 Question: What is Delta Lake?
 """
 
-llm.chat(prompt)
+prompt
+```
+
+Use your LLM of choice (DBRX / Llama / GPT-4o):
+
+```python
+
+# prompt = f"""
+# Use ONLY this context to answer:
+
+# {context}
+
+# Question: What is Delta Lake?
+# """
+
+# llm.chat(prompt)
+
+# Example using Databricks Model Serving
+# Replace with your LLM endpoint
+llm_answer = my_llm.chat(prompt)
+llm_answer
+
+
 ```
 
 ---
