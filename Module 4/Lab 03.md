@@ -66,6 +66,7 @@ They will also understand how RAG retrieves context.
 %pip install accelerate
 dbutils.library.restartPython()
 
+import numpy as np
 
 df = spark.read.format("delta").load("/Volumes/workspace/lab/myvolume/prepared_chunks")
 local_df = df.toPandas()

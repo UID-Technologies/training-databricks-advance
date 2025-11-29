@@ -240,6 +240,9 @@ They allow RAG to:
 ```python
 df = spark.createDataFrame(vector_data, ["chunk", "embedding"])
 df.write.format("delta").mode("overwrite").saveAsTable("rag_catalog.prepared.chunks")
+
+df.write.format("delta").mode("overwrite").save("/Volumes/workspace/lab/myvolume/prepared_chunks")
+
 ```
 
 
@@ -301,6 +304,7 @@ Run this cell at the TOP of your notebook:
 ```python
 %pip install sentence-transformers
 %pip install accelerate
+%pip install pyMuPDF
 dbutils.library.restartPython()
 ```
 
