@@ -116,10 +116,9 @@ rag_catalog.vectors.rag_vectors
 import faiss
 import numpy as np
 
-dim = len(vector_data[0][1])
-index = faiss.IndexFlatL2(dim)
 
-vectors = np.array([v[1] for v in vector_data]).astype("float32")
+dim = vectors.shape[1]
+index = faiss.IndexFlatL2(dim)
 index.add(vectors)
 ```
 
