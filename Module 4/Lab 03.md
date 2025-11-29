@@ -226,9 +226,7 @@ This step computes **cosine similarity** between:
 
 Then filters based on threshold `0.5`.
 
-### Great teaching moment:
-
-Give this explanation:
+### Give this explanation:
 
 > “L2 distance gives nearest neighbors but cosine similarity gives *semantic match quality*.”
 
@@ -245,6 +243,15 @@ These are the **most relevant chunks** for the query:
 
 > "Explain Databricks training options."
 
+
+
+```
+
+0.75 - 0.90 - very good match
+0.55 - 0.70 - relavent
+0.30 - 0.50 - weak
+0.05 - 0.20 - random
+```
 
 ---
 
