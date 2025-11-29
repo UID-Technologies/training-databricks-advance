@@ -95,6 +95,9 @@ You can also view it in **MLflow UI**.
 ## **STEP 2 — Create RAG Function**
 
 ```python
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
 def rag_query(question, vector_index, chunks):
     # Embed question
     q_emb = model.encode(question)
