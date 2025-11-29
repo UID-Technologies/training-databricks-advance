@@ -286,6 +286,91 @@ llm_answer
 
 ```
 
+or
+
+
+```python
+
+
+import requests
+import json
+
+class DatabricksLLM:
+    def __init__(self, endpoint_url):
+        self.url = endpoint_url
+        self.token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+
+    def chat(self, prompt):
+        payload = {
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(self.url, headers=headers, data=json.dumps(payload))
+        data = response.json()
+
+        # ---- FIX: Normalize LIST → DICT ----
+        if isinstance(data, list):
+            # assume list of messages or list of outputs
+            data = data[0]
+
+        # ---- FIX: Handle DBRX-style responses ----
+        if "messages" in data:
+            # DBRX or ChatCompletions format
+            # messages = [{"role": "assistant", "content": "..."}]
+            for msg in data["messages"]:
+                if msg["role"] == "assistant":
+                    return msg["content"]
+
+        # ---- FIX: Handle direct 'message' key ----
+        if "message" in data:
+            return data["message"]
+
+        # ---- FIX: Handle 'output_text' ----
+        if "output_text" in data:
+            return data["output_text"]
+
+        # ---- FIX: Handle predictions / outputs (pyfunc style) ----
+        if "predictions" in data:
+            return data["predictions"]
+
+        if "outputs" in data:
+            return data["outputs"]
+
+        # ---- Fallback ----
+        return data
+
+        
+
+# SETUP THE CLIENT
+my_llm = DatabricksLLM("https://dbc-c2d001f7-ac1c.cloud.databricks.com/serving-endpoints/test-endpoint/invocations")
+
+
+
+# prompt = f"""
+# Use ONLY this context to answer:
+
+# {context}
+
+# Question: What is Delta Lake?
+# """
+
+# llm.chat(prompt)
+
+# Example using Databricks Model Serving
+# Replace with your LLM endpoint
+resp = my_llm.chat(prompt)
+print(resp)
+
+
+```
+
 ---
 
 #  **End-to-End Serving Architecture**
