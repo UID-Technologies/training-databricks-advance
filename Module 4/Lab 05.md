@@ -215,6 +215,22 @@ def embed_via_endpoint(texts):
 ### 2 Use embeddings in RAG retrieval
 
 ```python
+import numpy as np
+import pandas as pd
+
+# Load your prepared chunks table from LAB 4
+df = spark.read.format("delta").load("/Volumes/workspace/lab/myvolume/prepared_chunks")
+pdf = df.toPandas()
+
+# Extract text chunks and embeddings
+chunks = pdf["chunk"].tolist()
+vectors = np.stack(pdf["embedding"].apply(lambda x: np.array(x, dtype="float32")).values)
+
+print("Loaded chunks:", len(chunks))
+print("Vectors shape:", vectors.shape)
+
+
+
 # Query embedding
 q_emb = np.array(embed_via_endpoint(["What is Delta Lake?"])[0], dtype="float32")
 
