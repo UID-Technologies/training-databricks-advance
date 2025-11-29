@@ -64,6 +64,7 @@ They will also understand how RAG retrieves context.
 
 %pip install sentence-transformers
 %pip install accelerate
+%pip install faiss-cpu
 dbutils.library.restartPython()
 
 import numpy as np
