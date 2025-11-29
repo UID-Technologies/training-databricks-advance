@@ -100,15 +100,27 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 import numpy as np
 
-def rag_query(question, vectors, chunks):
+df = spark.read.format("delta").load("/Volumes/workspace/lab/myvolume/prepared_chunks")
+pdf = df.toPandas()
+
+chunks = pdf["chunk"].tolist()
+vectors = np.array(pdf["embedding"].tolist()).astype("float32")
+
+
+def rag_query(question):
     # Embed question
     q_emb = model.encode(question)
-    
-    # Retrieve similar chunks
+
+    # Compute simalarity 
     sims = np.dot(vectors, q_emb)
+
+    # Get top 3 matching chunks
     top = np.argsort(sims)[::-1][:3]
+    
+    # Combine top chunks as context
     context = "\n".join(chunks[i] for i in top)
     
+    # Build RAG prompt
     prompt = f"""
     Answer using ONLY the context below:
 
@@ -118,6 +130,10 @@ def rag_query(question, vectors, chunks):
     """
 
     return prompt
+
+
+
+
 ```
 
 ##  What this step does
@@ -192,7 +208,7 @@ This is the final prompt used by the LLM.
 ## **STEP 3 — Call LLM**
 
 ```python
-response = llm.chat(rag_query("What is Delta Lake?", index, chunks))
+response = rag_query("What is Delta Lake?")
 print(response)
 ```
 
