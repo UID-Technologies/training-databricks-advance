@@ -1,3 +1,439 @@
+#  **LAB 06 — Build an Enterprise AI Observability System (Standalone Edition)**
+
+### *(Telemetry ▸ Monitoring ▸ Evaluation ▸ Drift)*
+
+---
+
+#  **Learning Objectives**
+
+By the end of this standalone lab, learners will build:
+
+✔ A **Telemetry Logging Layer**
+✔ An **Evaluation Pipeline (BLEU, ROUGE, LLM Judge)**
+✔ A **Model Drift Detection System**
+✔ A **Databricks Observability Dashboard**
+✔ Automation using **Workflows → Jobs**
+
+This lab simulates real enterprise observability for AI systems.
+
+---
+
+
+
+#  **Enterprise Observability Architecture**
+
+```
+                   ┌───────────────────────┐
+                   │    User / App Layer    │
+                   └───────────────────────┘
+                               ↓
+                   ┌───────────────────────┐
+                   │     Telemetry Logs     │
+                   │  (Requests + Responses)│
+                   └───────────────────────┘
+                               ↓
+                   ┌───────────────────────┐
+                   │  Evaluation Metrics    │
+                   │ (BLEU, ROUGE, Judge)   │
+                   └───────────────────────┘
+                               ↓
+                   ┌───────────────────────┐
+                   │   Drift Detection      │
+                   │ (Quality/Latency Drift)│
+                   └───────────────────────┘
+                               ↓
+                   ┌───────────────────────┐
+                   │ Observability Dashboard│
+                   └───────────────────────┘
+                               ↓
+                   ┌───────────────────────┐
+                   │  Alerts & Automation   │
+                   └───────────────────────┘
+```
+
+---
+
+
+#  **STEP 0 — Notebook Setup (Standalone)**
+
+Create notebook:
+
+```
+06_ai_observability_standalone
+```
+
+---
+
+### 0.1 Install Dependencies
+
+```python
+%pip install sacrebleu rouge-score
+dbutils.library.restartPython()
+```
+
+---
+
+### 0.2 Import All Required Libraries
+
+```python
+import json, uuid, time
+from datetime import datetime
+
+import pandas as pd
+from sacrebleu import corpus_bleu
+from rouge_score import rouge_scorer
+
+import requests
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.getOrCreate()
+```
+
+---
+
+#  **STEP 1 — Synthetic Data (Standalone)**
+
+We generate **self-contained** dataset of:
+
+* 5 questions
+* 5 references
+* 5 simulated model responses
+* Simulated "context"
+
+### 1.1 Create Synthetic Questions / References / Model Outputs
+
+```python
+questions = [
+    "What is Delta Lake?",
+    "Explain ACID transactions.",
+    "What is a Data Lakehouse?",
+    "Define machine learning.",
+    "Explain what a feature store is."
+]
+
+references = {
+    "What is Delta Lake?": "Delta Lake is a storage layer that brings ACID transactions to data lakes.",
+    "Explain ACID transactions.": "ACID stands for Atomicity, Consistency, Isolation, Durability.",
+    "What is a Data Lakehouse?": "A Lakehouse combines data lakes and warehouses into one platform.",
+    "Define machine learning.": "Machine learning is the field of study where systems learn from data.",
+    "Explain what a feature store is.": "A feature store centralizes and manages ML features for training and serving."
+}
+
+# Simulated model outputs (imperfect on purpose)
+model_outputs = {
+    "What is Delta Lake?": "Delta Lake is a technology that helps manage data reliably.",
+    "Explain ACID transactions.": "ACID includes atomicity and consistency rules.",
+    "What is a Data Lakehouse?": "Lakehouse is an architecture for modern data.",
+    "Define machine learning.": "Machine learning means systems learn from examples.",
+    "Explain what a feature store is.": "A feature store is useful for machine learning pipelines."
+}
+```
+
+This makes the lab fully functional without external data.
+
+---
+
+#  **STEP 2 — Telemetry Logging Layer**
+
+We log:
+
+* question
+* response
+* latency
+* model name
+* context size
+
+### 2.1 Create Telemetry Table (Standalone)
+
+```python
+spark.sql("CREATE SCHEMA IF NOT EXISTS ai_obs")
+
+spark.sql("""
+CREATE TABLE IF NOT EXISTS ai_obs.telemetry_logs (
+    id STRING,
+    timestamp TIMESTAMP,
+    question STRING,
+    model STRING,
+    context_length INT,
+    latency_sec DOUBLE,
+    response STRING
+) USING delta
+""")
+```
+
+---
+
+### 2.2 Telemetry Logging Function
+
+```python
+def log_telemetry(question, response, latency, context):
+    df = spark.createDataFrame([{
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now(),
+        "question": question,
+        "model": "simulated-model-v1",
+        "context_length": len(context),
+        "latency_sec": latency,
+        "response": response
+    }])
+    
+    df.write.format("delta").mode("append").saveAsTable("ai_obs.telemetry_logs")
+```
+
+---
+
+#  **STEP 3 — Evaluation Metrics Layer**
+
+We compute:
+
+* BLEU
+* ROUGE-1
+* ROUGE-L
+* LLM Judge (mocked to keep standalone)
+
+### 3.1 Setup Evaluators
+
+```python
+scorer = rouge_scorer.RougeScorer(["rouge1","rougeL"])
+```
+
+---
+
+### 3.2 Mocked LLM Judge (Standalone Safe)
+
+No Databricks endpoint required — fully local.
+
+```python
+def llm_judge(question, answer):
+    # Simulated correctness (randomized)
+    import random
+    return {
+        "correctness": random.randint(3,5),
+        "groundedness": random.randint(2,5),
+        "safety": 5   # assume safe, as synthetic
+    }
+```
+
+---
+
+### 3.3 Create Evaluation Logs Table
+
+```python
+spark.sql("""
+CREATE TABLE IF NOT EXISTS ai_obs.evaluation_logs (
+    id STRING,
+    timestamp TIMESTAMP,
+    question STRING,
+    bleu DOUBLE,
+    rouge1 DOUBLE,
+    rougeL DOUBLE,
+    correctness INT,
+    groundedness INT,
+    safety INT,
+    avg_quality DOUBLE
+) USING delta
+""")
+```
+
+---
+
+### 3.4 Evaluation Logger
+
+```python
+def log_evaluation(question, answer, reference):
+    bleu = corpus_bleu([answer], [[reference]]).score
+    rouge = scorer.score(reference, answer)
+    judge = llm_judge(question, answer)
+
+    avg_quality = (judge["correctness"] + judge["groundedness"] + judge["safety"]) / 3
+
+    df = spark.createDataFrame([{
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now(),
+        "question": question,
+        "bleu": bleu,
+        "rouge1": rouge["rouge1"].fmeasure,
+        "rougeL": rouge["rougeL"].fmeasure,
+        "correctness": judge["correctness"],
+        "groundedness": judge["groundedness"],
+        "safety": judge["safety"],
+        "avg_quality": avg_quality
+    }])
+
+    df.write.format("delta").mode("append").saveAsTable("ai_obs.evaluation_logs")
+```
+
+---
+
+#  **STEP 4 — Full Observability Pipeline (Standalone)**
+
+```python
+def run_observability_pipeline(question):
+    reference = references[question]
+    synthetic_response = model_outputs[question]
+
+    # simulate latency
+    start = time.time()
+    time.sleep(0.2)
+    latency = time.time() - start
+
+    # Telemetry log
+    log_telemetry(
+        question,
+        synthetic_response,
+        latency,
+        context=reference
+    )
+
+    # Evaluation log
+    log_evaluation(
+        question,
+        synthetic_response,
+        reference
+    )
+
+    return synthetic_response
+```
+
+---
+
+#  **STEP 5 — Run for All Questions**
+
+```python
+for q in questions:
+    print("Evaluating:", q)
+    print(run_observability_pipeline(q))
+    print("----")
+```
+
+---
+
+#  **STEP 6 — Build Drift Table (Standalone)**
+
+```sql
+CREATE OR REPLACE TABLE ai_obs.quality_drift AS
+SELECT
+  date(timestamp) AS day,
+  AVG(avg_quality) AS avg_score
+FROM ai_obs.evaluation_logs
+GROUP BY day
+ORDER BY day;
+```
+
+---
+
+#  **STEP 7 — Drift Detection Query**
+
+```sql
+SELECT 
+  day,
+  avg_score,
+  LAG(avg_score) OVER (ORDER BY day) AS prev_score,
+  avg_score - LAG(avg_score) OVER (ORDER BY day) AS drift
+FROM ai_obs.quality_drift;
+```
+
+Add alert when:
+
+```
+avg_score < 3.5
+```
+
+---
+
+#  **STEP 8 — Build Observability Dashboard (Standalone)**
+
+Create dashboard and add these queries:
+
+---
+
+###  1. Average Quality Over Time (Line Chart)
+
+```sql
+SELECT * FROM ai_obs.quality_drift;
+```
+
+---
+
+###  2. BLEU / ROUGE Trends
+
+```sql
+SELECT timestamp, bleu, rouge1, rougeL
+FROM ai_obs.evaluation_logs
+ORDER BY timestamp;
+```
+
+---
+
+###  3. Latency Monitoring
+
+```sql
+SELECT timestamp, latency_sec
+FROM ai_obs.telemetry_logs
+ORDER BY timestamp;
+```
+
+---
+
+###  4. Question-Level Heatmap
+
+```sql
+SELECT question, avg_quality
+FROM ai_obs.evaluation_logs;
+```
+
+---
+
+###  5. Telemetry Table
+
+```sql
+SELECT * FROM ai_obs.telemetry_logs;
+```
+
+---
+
+#  **STEP 9 — Automate with Databricks Jobs**
+
+Create job:
+
+```
+ai_observability_job
+```
+
+Tasks:
+
+1. `generate_synthetic_activity`
+2. `run_observability_pipeline`
+3. `drift_analysis`
+
+Schedule:
+**Every 1 hour**
+
+Add alert:
+**When avg_score < 3.5**
+
+---
+
+#  **LAB COMPLETE — You Built a Standalone AI Observability Platform**
+
+This lab now:
+
+✔ Runs fully standalone
+✔ Generates its own synthetic questions, references, responses
+✔ Logs telemetry & evaluation
+✔ Computes drift
+✔ Builds analytics dashboard
+✔ Supports automated jobs
+
+
+
+
+
+
+
+
+
+
+<!-- 
 #  **LAB 06 — Build an Enterprise AI Observability System**
 
 ### *(Telemetry ▸ Monitoring ▸ Evaluation ▸ Drift)*
@@ -407,4 +843,4 @@ This is **exactly** what companies deploy for:
 * Safety-critical AI systems
 * LLM governance & compliance
 
----
+--- -->
