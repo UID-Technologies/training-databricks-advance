@@ -1,4 +1,424 @@
 
+# 🧪 **LAB 02 — Build a Complete RAG Evaluation Dashboard in Databricks**
+
+### *(BLEU, ROUGE, LLM-as-a-Judge, Groundedness, Safety, UC Tables, Dashboards)*
+
+---
+
+#  **Lab Goals**
+
+By the end of this standalone lab, a learner will:
+
+✔ Compute BLEU & ROUGE evaluation metrics
+✔ Evaluate correctness, groundedness, safety using an LLM
+✔ Store results in a Delta table
+✔ Build an analytics **Gold evaluation table**
+✔ Create a Databricks **Interactive Dashboard**
+✔ Identify hallucinations & unsafe responses
+✔ Build an enterprise-grade evaluation workflow for RAG/LLM systems
+
+---
+
+#  **Prerequisites (Minimal)**
+
+Nothing from other labs is required.
+
+Only ensure:
+
+### 1 A Databricks workspace
+
+### 2 A user cluster or SQL warehouse
+
+### 3 **One LLM Chat endpoint** (function calling not required)
+
+Use any supported Databricks Foundation Model endpoint
+(examples in your workspace: Llama 3.1 70B, Qwen, GPT-5.1, etc.)
+
+In this lab we use:
+
+```
+databricks-meta-llama-3-1-405b-instruct
+```
+
+Replace with any chat endpoint you prefer.
+
+---
+
+
+
+#  **STEP 0 — Setup: Import Libraries + Configure LLM Endpoint**
+
+
+
+This block sets up everything:
+
+* Imports BLEU, ROUGE libraries
+* Connects to your Databricks LLM endpoint
+* Creates a helper function `llm_chat()`
+
+ **Self-contained — nothing external required.**
+
+---
+
+```python
+# COMMAND ----------
+
+# Install eval libraries if missing
+%pip install sacrebleu rouge-score --quiet
+
+import json
+import requests
+import pandas as pd
+from sacrebleu import corpus_bleu
+from rouge_score import rouge_scorer
+
+# ------------------------------
+# Databricks Workspace + Token
+# ------------------------------
+workspace = spark.conf.get("spark.databricks.workspaceUrl")
+token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+
+# ------------------------------
+# LLM Endpoint (Chat Model)
+# ------------------------------
+LLM_ENDPOINT = "databricks-meta-llama-3-1-405b-instruct"
+LLM_URL = f"https://{workspace}/serving-endpoints/{LLM_ENDPOINT}/invocations"
+
+HEADERS = {
+    "Authorization": f"Bearer {token}",
+    "Content-Type": "application/json"
+}
+
+def llm_chat(prompt: str) -> str:
+    """Send a prompt to the LLM and return assistant text."""
+    payload = {"messages": [{"role": "user", "content": prompt}]}
+    resp = requests.post(LLM_URL, headers=HEADERS, data=json.dumps(payload))
+    resp.raise_for_status()
+    data = resp.json()
+    return data["choices"][0]["message"]["content"]
+```
+
+---
+
+
+
+#  **STEP 1 — Create Sample Evaluation Example**
+
+
+
+This lab generates **one evaluation row**, but you can loop it for many questions.
+
+We evaluate:
+
+* BLEU
+* ROUGE-1 & ROUGE-L
+* correctness (1–5)
+* groundedness (1–5)
+* safety (1–5)
+
+This is **fully standalone** — we provide question, reference, and generated answer.
+
+---
+
+```python
+# COMMAND ----------
+
+# Sample data for evaluation
+question = "What is Delta Lake?"
+reference = "Delta Lake is a reliable storage layer that brings ACID transactions to data lakes."
+generated = "Delta Lake manages ACID transactions and ensures reliability for big data."
+
+# -------------------
+# BLEU
+# -------------------
+bleu = corpus_bleu([generated], [[reference]]).score
+
+# -------------------
+# ROUGE
+# -------------------
+scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
+rouge = scorer.score(reference, generated)
+
+# -------------------
+# LLM-as-a-Judge
+# -------------------
+judge_prompt = f"""
+Evaluate the following answer on a scale of 1–5.
+
+Question: {question}
+Answer: {generated}
+
+Rate:
+- correctness (1–5)
+- groundedness (1–5)
+- safety (1–5)
+
+Respond ONLY with JSON:
+{{
+  "correctness": <int>,
+  "groundedness": <int>,
+  "safety": <int>
+}}
+"""
+
+judge_scores = json.loads(llm_chat(judge_prompt))
+
+row = {
+    "question": question,
+    "generated": generated,
+    "reference": reference,
+    "bleu": bleu,
+    "rouge1": rouge["rouge1"].fmeasure,
+    "rougeL": rouge["rougeL"].fmeasure,
+    "correctness": judge_scores["correctness"],
+    "groundedness": judge_scores["groundedness"],
+    "safety": judge_scores["safety"]
+}
+
+pdf_eval = pd.DataFrame([row])
+pdf_eval
+```
+
+---
+
+
+
+#  **STEP 2 — Save the Evaluation Result into Delta Table**
+
+
+
+You do **not** need anything from other labs.
+We will create the table here.
+
+---
+
+### 2.1 Convert Pandas → Spark
+
+```python
+# COMMAND ----------
+df_eval = spark.createDataFrame(pdf_eval)
+df_eval.display()
+```
+
+---
+
+### 2.2 Store in UC Table (recommended)
+
+```python
+# COMMAND ----------
+spark.sql("CREATE SCHEMA IF NOT EXISTS rag_eval")
+df_eval.write.format("delta").mode("append").saveAsTable("rag_eval.eval_results")
+```
+
+---
+
+### 2.3 Verify Table Contents
+
+```python
+# COMMAND ----------
+spark.sql("SELECT * FROM rag_eval.eval_results").display()
+```
+
+---
+
+
+
+#  **STEP 3 — Build GOLD Evaluation Table**
+
+
+
+A Gold table is clean, analytics-ready, dashboard-ready.
+
+This is standard Bronze → Silver → Gold MLOps pattern.
+
+---
+
+Create Gold table with SQL:
+
+```sql
+-- COMMAND ----------
+CREATE OR REPLACE TABLE rag_eval.eval_results_gold AS
+SELECT
+  question,
+  bleu,
+  rouge1,
+  rougeL,
+  correctness,
+  groundedness,
+  safety,
+  ROUND((correctness + groundedness + safety)/3, 2) AS avg_score,
+  current_timestamp() AS ts
+FROM rag_eval.eval_results;
+```
+
+---
+
+### Verify Gold Table
+
+```sql
+SELECT * FROM rag_eval.eval_results_gold;
+```
+
+---
+
+
+
+#  **STEP 4 — Explore Evaluation Data (SQL Analytics)**
+
+
+
+### 4.1 All results
+
+```sql
+SELECT *
+FROM rag_eval.eval_results_gold;
+```
+
+---
+
+### 4.2 Detect hallucinations
+
+```sql
+SELECT *
+FROM rag_eval.eval_results_gold
+WHERE groundedness < 3;
+```
+
+---
+
+### 4.3 Top scoring answers
+
+```sql
+SELECT *
+FROM rag_eval.eval_results_gold
+ORDER BY avg_score DESC
+LIMIT 10;
+```
+
+---
+
+### 4.4 Safety monitoring
+
+```sql
+SELECT question, safety
+FROM rag_eval.eval_results_gold
+ORDER BY safety;
+```
+
+---
+
+
+
+#  **STEP 5 — Build Evaluation Dashboard**
+
+
+
+No dependency on any other lab — works with only the Gold table created above.
+
+---
+
+##  Dashboard Steps
+
+1. Left Sidebar → **SQL**
+2. Click **Dashboards**
+3. Click **Create Dashboard**
+4. Name:
+
+```
+RAG Evaluation – Model Quality Dashboard
+```
+
+---
+
+##  Add These Visualizations
+
+### **Chart 1 — BLEU over Time (Line Chart)**
+
+```sql
+SELECT ts, bleu FROM rag_eval.eval_results_gold ORDER BY ts;
+```
+
+---
+
+### **Chart 2 — ROUGE-L Histogram**
+
+```sql
+SELECT rougeL FROM rag_eval.eval_results_gold;
+```
+
+---
+
+### **Chart 3 — LLM Judge Metrics (Correctness, Groundedness, Safety)**
+
+```sql
+SELECT ts, correctness, groundedness, safety
+FROM rag_eval.eval_results_gold
+ORDER BY ts;
+```
+
+Use **Multi-series Bar Chart**.
+
+---
+
+### **Chart 4 — Model Health Heatmap**
+
+```sql
+SELECT question, avg_score
+FROM rag_eval.eval_results_gold
+ORDER BY avg_score DESC;
+```
+
+---
+
+### **Chart 5 — Hallucination Risk Table**
+
+```sql
+SELECT question, groundedness
+FROM rag_eval.eval_results_gold
+WHERE groundedness < 3;
+```
+
+---
+
+
+
+#  **STEP 6 — Add Dashboard Filters**
+
+
+
+Add filters:
+
+🔘 Dropdown filter → `question`
+🔘 Slider → `avg_score`
+🔘 Date → `ts`
+🔘 Multi-select → Metric (bleu, rouge1, safety)
+
+You now have a **production-grade evaluation console**.
+
+---
+
+#  **LAB COMPLETE**
+
+
+Learners accomplished:
+
+✔ BLEU / ROUGE scoring
+✔ LLM-as-a-Judge scoring
+✔ Groundedness / safety detection
+✔ UC table creation
+✔ Gold analytics table
+✔ SQL exploration
+✔ Full dashboard creation
+✔ No dependency on any other lab
+
+This is exactly how **real GenAI / RAG evaluation workflows** are built in Databricks.
+
+---
+
+
+
+
+<!-- 
 #  **Lab 02 — Build an Evaluation Dashboard Using the Databricks**
 
 ### *(BLEU, ROUGE, LLM Judge, Faithfulness & Safety Analytics)*
@@ -323,4 +743,4 @@ This makes the dashboard accessible to your entire team.
 
 This is exactly what AI/ML engineering teams do before deploying RAG/LLM systems into production.
 
----
+--- -->
