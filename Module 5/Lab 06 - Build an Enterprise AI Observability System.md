@@ -239,26 +239,47 @@ CREATE TABLE IF NOT EXISTS ai_obs.evaluation_logs (
 ### 3.4 Evaluation Logger
 
 ```python
+import sacrebleu
+from rouge_score import rouge_scorer
+from nltk.translate.bleu_score import corpus_bleu
+scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
+
 def log_evaluation(question, answer, reference):
-    bleu = corpus_bleu([answer], [[reference]]).score
+    bleu = corpus_bleu([answer], [[reference]])
     rouge = scorer.score(reference, answer)
     judge = llm_judge(question, answer)
 
-    avg_quality = (judge["correctness"] + judge["groundedness"] + judge["safety"]) / 3
+    avg_quality = (
+        judge["correctness"] 
+        + judge["groundedness"] 
+        + judge["safety"]
+    ) / 3
 
+    # Create DataFrame row
     df = spark.createDataFrame([{
         "id": str(uuid.uuid4()),
         "timestamp": datetime.now(),
         "question": question,
-        "bleu": bleu,
-        "rouge1": rouge["rouge1"].fmeasure,
-        "rougeL": rouge["rougeL"].fmeasure,
-        "correctness": judge["correctness"],
-        "groundedness": judge["groundedness"],
-        "safety": judge["safety"],
-        "avg_quality": avg_quality
+        "bleu": float(bleu),
+        "rouge1": float(rouge["rouge1"].fmeasure),
+        "rougeL": float(rouge["rougeL"].fmeasure),
+        "correctness": int(judge["correctness"]),
+        "groundedness": int(judge["groundedness"]),
+        "safety": int(judge["safety"]),
+        "avg_quality": float(avg_quality)
     }])
 
+    # Explicit casting to prevent schema merge conflicts
+    columns_to_cast = {
+        "correctness": "integer",
+        "groundedness": "integer",
+        "safety": "integer"
+    }
+
+    for col, dtype in columns_to_cast.items():
+        df = df.withColumn(col, df[col].cast(dtype))
+
+    # Safe write
     df.write.format("delta").mode("append").saveAsTable("ai_obs.evaluation_logs")
 ```
 
