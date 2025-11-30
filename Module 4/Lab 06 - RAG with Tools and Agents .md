@@ -16,7 +16,7 @@
 ##  **STEP 1 — Imports & Setup**
 
 ```python
-# COMMAND ----------
+
 import requests, json, numpy as np, pandas as pd
 import os
 ```
@@ -26,7 +26,7 @@ import os
 ##  **STEP 2 — Setup Embedding Endpoint (from LAB 5)**
 
 ```python
-# COMMAND ----------
+
 # Reuse the embedding model from Lab 5
 token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 
@@ -44,7 +44,7 @@ headers = {
 ##  **STEP 3 — Embed Helper Using Model Serving**
 
 ```python
-# COMMAND ----------
+
 def embed(texts):
     """Embed text using the served MLflow embedding model."""
     payload = {"inputs": texts}
@@ -57,7 +57,7 @@ def embed(texts):
 ##  **STEP 4 — Load Chunks (Generated in Lab 4/5)**
 
 ```python
-# COMMAND ----------
+
 df = spark.read.format("delta").load("/Volumes/workspace/lab/myvolume/prepared_chunks")
 pdf = df.toPandas()
 
@@ -72,7 +72,7 @@ len(chunks), vectors.shape
 ##  **STEP 5 — Build RAG Retriever (Using Served Embeddings)**
 
 ```python
-# COMMAND ----------
+
 def rag_search(query):
     """Return top chunks based on embedding similarity."""
     
@@ -96,7 +96,7 @@ def rag_search(query):
 ##  **STEP 6 — Add Calculator Tool**
 
 ```python
-# COMMAND ----------
+
 def calculator(expression: str):
     allowed = "0123456789+-*/(). "
     if not all(c in allowed for c in expression):
@@ -112,7 +112,7 @@ def calculator(expression: str):
 ##  **STEP 7 — Optional SQL Tool**
 
 ```python
-# COMMAND ----------
+
 def sql_query(query):
     try:
         df = spark.sql(query)
@@ -126,7 +126,7 @@ def sql_query(query):
 ##  **STEP 8 — Define Tool Schemas for the LLM**
 
 ```python
-# COMMAND ----------
+
 tools = [
     {
         "type": "function",
@@ -179,10 +179,11 @@ tool_map = {
 ##  **STEP 9 — LLM Client (Databricks Foundation Models)**
 
 ```python
-# COMMAND ----------
+
 class DatabricksLLM:
-    def __init__(self, endpoint):
-        self.url = f"https://{workspace}/serving-endpoints/{endpoint}/invocations"
+    def __init__(self):
+        self.url = "https://dbc-c2d001f7-ac1c.cloud.databricks.com/serving-endpoints/databricks-meta-llama-3-1-405b-instruct/invocations"
+
         self.token = token
 
     def chat(self, messages, tools=None):
@@ -206,42 +207,122 @@ class DatabricksLLM:
 ### Select your LLM endpoint
 
 ```python
-# COMMAND ----------
-llm = DatabricksLLM("test-endpoint")   # CHANGE THIS to your LLM endpoint
+
+llm = DatabricksLLM()    # CHANGE THIS to your LLM endpoint
 ```
 
 ---
 
 ##  **STEP 10 — Build the AGENT (Planner → Tool Caller → Answer)**
 
+
 ```python
-# COMMAND ----------
+def extract_message(response):
+    """Normalize ALL Databricks LLM response formats to a single dict with:
+    { "content": str, "tool_calls": [...] }
+    """
+
+    # 1. If response is already a string
+    if isinstance(response, str):
+        return {"content": response, "tool_calls": None}
+
+    # 2. Databricks ChatCompletions format
+    if "choices" in response:
+        choice = response["choices"][0]
+
+        # Case A: Chat-style message
+        if "message" in choice:
+            msg = choice["message"]
+            return {
+                "content": msg.get("content"),
+                "tool_calls": msg.get("tool_calls")
+            }
+
+        # Case B: messages[] – DBRX older formats
+        if "messages" in choice:
+            # find assistant message
+            for m in choice["messages"]:
+                if m.get("role") == "assistant":
+                    return {
+                        "content": m.get("content"),
+                        "tool_calls": m.get("tool_calls")
+                    }
+
+        # Case C: Text-only completion
+        if "text" in choice:
+            return {"content": choice["text"], "tool_calls": None}
+
+    # 3. Direct "messages" field in root
+    if "messages" in response:
+        for m in response["messages"]:
+            if m.get("role") == "assistant":
+                return {
+                    "content": m.get("content"),
+                    "tool_calls": m.get("tool_calls")
+                }
+
+    # 4. "message" field
+    if "message" in response:
+        msg = response["message"]
+        if isinstance(msg, str):
+            return {"content": msg, "tool_calls": None}
+        return {
+            "content": msg.get("content"),
+            "tool_calls": msg.get("tool_calls")
+        }
+
+    # 5. Fallback: output_text
+    if "output_text" in response:
+        return {"content": response["output_text"], "tool_calls": None}
+
+    # 6. Total fallback
+    return {"content": str(response), "tool_calls": None}
+
+```
+
+
+```python
+
 def agent(query):
-    # Step 1 — Ask LLM what to do
+
+    # Step 1 — Ask LLM what tool to call
     messages = [{"role": "user", "content": query}]
-    response = llm.chat(messages, tools=tools)
-    
-    # If no tool call → return direct answer
-    if "tool_calls" not in response.get("message", {}):
-        return response["message"]["content"]
-    
-    tool_call = response["message"]["tool_calls"][0]
-    tool_name = tool_call["name"]
-    args = json.loads(tool_call["arguments"])
-    
-    # Step 2 — Execute tool in Python
+    raw_response = llm.chat(messages, tools=tools)
+    llm_response = extract_message(raw_response)
+
+    # If there are no tool calls, return direct answer
+    if not llm_response["tool_calls"]:
+        return llm_response["content"]
+
+    # Step 2 — Extract tool call
+    tool_call = llm_response["tool_calls"][0]
+
+    tool_call_id = tool_call["id"]
+    tool_name = tool_call["function"]["name"]
+    args = json.loads(tool_call["function"]["arguments"])
+
+    # Step 3 — Execute the tool
     result = tool_map[tool_name](**args)
-    
-    # Step 3 — Send result back to LLM
-    messages.append(response["message"])
+
+    # Step 4 — Send tool result back to LLM
+    messages.append({
+        "role": "assistant",
+        "content": None,
+        "tool_calls": llm_response["tool_calls"]
+    })
+
     messages.append({
         "role": "tool",
-        "tool_name": tool_name,
+        "tool_call_id": tool_call_id,
         "content": json.dumps(result)
     })
-    
-    final = llm.chat(messages)
-    return final["message"]["content"]
+
+    # Step 5 — Ask LLM to produce final answer
+    final_raw = llm.chat(messages)
+    final = extract_message(final_raw)
+
+    return final["content"]
+
 ```
 
 ---
@@ -253,8 +334,9 @@ def agent(query):
 ##  RAG Search Test
 
 ```python
-# COMMAND ----------
+
 agent("What is Delta Lake?")
+
 ```
 
 ---
@@ -262,7 +344,7 @@ agent("What is Delta Lake?")
 ##  Calculator Test
 
 ```python
-# COMMAND ----------
+
 agent("What is 999 * 38?")
 ```
 
