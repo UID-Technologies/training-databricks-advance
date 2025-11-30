@@ -242,14 +242,40 @@ def detect_toxicity(text: str) -> bool:
 
 ```python
 
+from presidio_analyzer import AnalyzerEngine
+from presidio_analyzer.predefined_recognizers import (
+    UsSsnRecognizer,
+    PhoneRecognizer,
+    CreditCardRecognizer,
+    EmailRecognizer
+)
+
 analyzer = AnalyzerEngine()
+
+analyzer.registry.add_recognizer(UsSsnRecognizer())
+analyzer.registry.add_recognizer(CreditCardRecognizer())
+analyzer.registry.add_recognizer(PhoneRecognizer())
+analyzer.registry.add_recognizer(EmailRecognizer())
 
 def contains_pii(text: str) -> bool:
     """
     Uses Presidio to detect PII in the text.
     """
+    # results = analyzer.analyze(text=text, language="en")
+    # return len(results) > 0
+
     results = analyzer.analyze(text=text, language="en")
-    return len(results) > 0
+
+    #allowed_types = ["ORG", "PERSON", "LOCATION"]   # allow these
+    risky_types = ["CREDIT_CARD", "PHONE_NUMBER", "US_SSN", "EMAIL_ADDRESS"]
+
+    # risky_results = [r for r in results if r.entity_type in risky_types]
+
+    # return len(risky_results) > 0
+
+    return any(r.entity_type in risky_types for r in results)
+
+
 ```
 
 ---
