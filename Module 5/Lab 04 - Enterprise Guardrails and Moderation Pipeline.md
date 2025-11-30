@@ -1,6 +1,6 @@
 #  **LAB 4 — Enterprise Guardrails + Moderation Pipeline**
 
-### *(AI Safety Layer for Production RAG Systems – Databricks NEW UI + Trial Edition)*
+### *AI Safety Layer for Production RAG Systems – Databricks*
 
 ---
 
